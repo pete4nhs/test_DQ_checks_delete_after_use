@@ -112,10 +112,14 @@ def validate_year_columns(df):
 def validate_datetime_columns(df):
     col = 'DATE AND TIME DATA SET CREATED'
     if col not in df.columns:
-        return "Error: 'DATE AND TIME DATA SET CREATED' column not found in the data."
-    df[col] = df[col].astype(str)
-    pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}'
-    invalid = df[~df[col].str.match(pattern, na=False)]
+        return f"Error: '{col}' column not found in the data."
+
+        df[col] = clean_numeric_text(df[col])
+    parsed = pd.to_datetime(df[col], errors="coerce")
+    invalid = df[
+        df[col].notna() & (
+            parsed.isna() |        # not a datetime at all
+            parsed.dt.second.isna())]  # seconds missing
     return list(invalid.index) if not invalid.empty else "Valid"
 
 # --------------------- ORGANISATION IDENTIFIER (CODE OF PROVIDER) (mandatory)
