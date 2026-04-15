@@ -1,0 +1,21 @@
+﻿Commissioned Service Category Code,Commissioned Service Category Code Description
+12,INTEGRATED CARE BOARD
+21,NHS ENGLAND - SPECIALISED SERVICES
+22,NHS ENGLAND - SPECIALISED MENTAL HEALTH SERVICES
+25,DELEGATED SPECIALISED ACUTE SERVICES (must only be used when a service has been formally delegated)
+26,DELEGATED SPECIALISED MENTAL HEALTH SERVICES (must only be used when a service has been formally delegated)
+31,NHS ENGLAND - CANCER DRUG FUND (funded nationally)
+32,NHS ENGLAND - INNOVATIVE MEDICINES FUND (funded nationally)
+41,NHS ENGLAND - HEPATITIS C (only where this is funded as part of the NHS England Direct Acting Anti-viral Therapy)
+51,NHS ENGLAND - SECONDARY DENTISTRY
+55,DELEGATED SECONDARY DENTISTRY
+61,NHS ENGLAND - ARMED FORCES (funded nationally)
+71,NHS ENGLAND - HEALTH IN JUSTICE
+75,DELEGATED HEALTH IN JUSTICE (must only be used when a service has been formally delegated)
+81,NHS ENGLAND - PUBLIC HEALTH
+85,DELEGATED PUBLIC HEALTH (must only be used when a service has been formally delegated)
+91,DEPARTMENT OF HEALTH
+92,MINISTRY OF DEFENCE (only where the Ministry of Defence is funding the service not NHS England)
+93,INDIVIDUAL FUNDING REQUEST
+98,OTHER (NOT LISTED)
+99,NOT KNOWN
