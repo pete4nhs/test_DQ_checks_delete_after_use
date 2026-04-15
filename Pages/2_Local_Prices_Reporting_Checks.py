@@ -12,8 +12,7 @@ st.set_page_config(
     page_icon="https://www.england.nhs.uk/wp-content/themes/nhsengland/static/img/favicon.ico",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={"About": "This tool is designed to support ICBs/Trusts to check the data quality of their submission for Local Prices."},
-)
+    menu_items={"About": "This tool is designed to support ICBs/Trusts to check the data quality of their submission for Local Prices."},)
 
 # ---------------------- Session state initialisation ----------------------
 if "final_df" not in st.session_state:
@@ -429,8 +428,7 @@ REQUIREMENT_MAP = {
     'LOCAL POINT OF DELIVERY CODE': 'optional',
     'LOCAL POINT OF DELIVERY DESCRIPTION': 'optional',
     'TARIFF CODE': 'mandatory where relevant',
-    'LOCAL PRICE': 'mandatory',
-}
+    'LOCAL PRICE': 'mandatory',}
 
 # ---------------------- STYLING (only Status column coloured) ----------------------
 def style_results_table(df: pd.DataFrame):
@@ -546,8 +544,7 @@ if st.session_state.calc_done and st.session_state.final_df is not None:
                 Local Prices Reporting DQ results
             </div>
             """,
-            unsafe_allow_html=True,
-        )
+            unsafe_allow_html=True,)
         st.caption("Preview or download the analysed results")
 
         # Two half-width buttons
@@ -562,8 +559,7 @@ if st.session_state.calc_done and st.session_state.final_df is not None:
                 file_name="Analysed Local Prices DQ checks.csv",
                 mime="text/csv",
                 key="dq_download_btn",
-                use_container_width=True
-            )
+                use_container_width=True)
 
     # Inline preview that persists across reruns (only Status column coloured)
     if st.session_state.show_preview:
@@ -574,8 +570,7 @@ if st.session_state.calc_done and st.session_state.final_df is not None:
                 styled,
                 use_container_width=True,
                 height=560,
-                hide_index=True
-            )
+                hide_index=True)
             st.button("Close preview", key="close_preview_btn", on_click=lambda: st.session_state.update(show_preview=False))
 
 else:
