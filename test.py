@@ -3,6 +3,6 @@
 import streamlit as st
 #st.write("Hello from entrypoint")
 
-from IAP_app import run_app
+from IAP_Checks import run_app
 
 run_app()
