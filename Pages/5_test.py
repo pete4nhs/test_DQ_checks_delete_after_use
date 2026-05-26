@@ -537,83 +537,61 @@ def validate_tariff_code_columns(df):
         if c not in df.columns:
             return f"Error: '{c}' column not found in the data."
 
-    # PODs where tariff CAN be blank
+    # POD values where tariff code is NOT required (but allowed if <= 50 chars)
     exclude_pods = {"ADJUSTMENT", "BLOCK", "CQUIN", "DRUG", "DEVICE", "NAOTHER", "OTHER"}
 
-    # Clean POD
     pod_raw = df[pod_col]
     pod = pod_raw.astype(str).str.strip().str.upper()
     pod_known = pod_raw.notna() & (pod != "")
 
-    # Clean tariff
     tariff_raw = df[col]
     tariff = tariff_raw.astype(str).str.strip()
+    has_tariff = tariff_raw.notna() & (tariff != "")
 
-    # Remove BOM / NBSP (helps avoid hidden prefix issues)
-    tariff_clean = (
-        tariff
-        .str.replace("\ufeff", "", regex=False)
-        .str.replace("\xa0", " ", regex=False)
-        .str.strip())
-
-    tariff_up = tariff_clean.str.upper()
-    has_tariff = tariff_raw.notna() & (tariff_clean != "")
-
-    # Load HRG reference
-
-    # when running locally
-#    hrg = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables\HRG.csv")
-
-    # when running in stlite
-    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/main/reference_tables/HRG.csv")
+    # Load HRG reference codes
+    hrg_URL = (
+    "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/HRG.csv")
     hrg = pd.read_csv(hrg_URL)
 
+    # HRG column name can vary; handle both
     if 'HRG_code' in hrg.columns:
         hrg_col = 'HRG_code'
     elif 'HRG_Code' in hrg.columns:
         hrg_col = 'HRG_Code'
     else:
+        # fallback: first column
         hrg_col = hrg.columns[0]
 
     valid_hrg = hrg[hrg_col].dropna().astype(str).str.strip().str.upper()
 
-    # Build lookup sets by length
+    # Build lookup sets by HRG code length for efficient prefix checking
     codes_by_len = {}
     for code in valid_hrg:
         codes_by_len.setdefault(len(code), set()).add(code)
 
-    # Prefix check
-    starts_with_hrg = pd.Series(False, index=df.index)
+    tariff_up = tariff.str.upper()
+
+    # starts_with_hrg: True if tariff begins with any valid HRG code
+    starts_with_hrg = False
     for L, code_set in codes_by_len.items():
-        starts_with_hrg |= tariff_up.str[:L].isin(code_set)
+        prefix_ok = tariff_up.str[:L].isin(code_set)
+        starts_with_hrg = prefix_ok if starts_with_hrg is False else (starts_with_hrg | prefix_ok)
 
-    # -----------------------------
-    # ✅ VALIDATION LOGIC
-    # -----------------------------
+    # Common length rule: if populated, must be <= 50
+    invalid_too_long = has_tariff & (tariff.str.len() > 50)
 
-    # Length rule (applies everywhere if populated)
-    invalid_too_long = has_tariff & (tariff_clean.str.len() > 50)
+    # Case A: POD is in exclude list => tariff may be blank OR populated (<=50)
+    # So: only invalid here is "too long" (handled above)
 
-    # Case 1: POD NOT in exclude → tariff required
+    # Case B: POD is NOT in exclude list => tariff must be populated and valid
     required = pod_known & (~pod.isin(exclude_pods))
 
     invalid_missing_when_required = required & (~has_tariff)
-    invalid_bad_prefix_required = required & has_tariff & (~starts_with_hrg)
+    invalid_bad_prefix_when_required = required & has_tariff & (~starts_with_hrg)
 
-    # Case 2: POD IN exclude → tariff optional, but if present must be valid
-    excluded = pod_known & pod.isin(exclude_pods)
-
-    invalid_bad_prefix_excluded = excluded & has_tariff & (~starts_with_hrg)
-
-    # Combine all invalid conditions
-    invalid_mask = (
-        invalid_too_long
-        | invalid_missing_when_required
-        | invalid_bad_prefix_required
-        | invalid_bad_prefix_excluded)
+    invalid_mask = invalid_too_long | invalid_missing_when_required | invalid_bad_prefix_when_required
 
     invalid_rows = df[invalid_mask]
-
     return list(invalid_rows.index) if not invalid_rows.empty else "Valid"
 
 
