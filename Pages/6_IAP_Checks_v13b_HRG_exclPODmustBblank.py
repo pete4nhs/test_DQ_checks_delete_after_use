@@ -204,7 +204,8 @@ def validate_gp_practice_columns(df):
             return f"Error: '{c}' column not found in the data."
 
     # Load ICB reference
-    ref_org = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating IAPs_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
+    ref_org_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
+    ref_org = pd.read_csv(ref_org_URL)
 
     # ✅ Decide which codes are valid
     # ICB_Code (Qxx)
@@ -255,7 +256,8 @@ def validate_residence_resp_columns(df):
             return f"Error: '{c}' column not found in the data."
 
     # Load ICB reference
-    ref_org = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating IAPs_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
+    ref_org_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
+    ref_org = pd.read_csv(ref_org_URL)
 
     # ICB Q-codes (QMJ, QMF, etc.)
     icb_codes = (ref_org['ICB_Code']
@@ -319,7 +321,9 @@ def validate_activity_TFC_columns(df):
     for c in req_cols:
         if c not in df.columns:
             return f"Error: '{c}' column not found in the data."
-    tfc_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables\TFC.csv")
+     tfc_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/main/reference_tables/TFC.csv")
+    tfc_df = pd.read_csv(tfc_URL)
+
     valid_codes = set(tfc_df.iloc[:, 0].dropna().astype(str))
     df['ACTIVITY TREATMENT FUNCTION CODE'] = df['ACTIVITY TREATMENT FUNCTION CODE'].astype(str)
     allowed_pod_values = {"ADJUSTMENT", "BLOCK", "CQUIN", "DRUG", "DEVICE", "NAOTHER"}
@@ -392,7 +396,9 @@ def validate_service_code_columns(df):
     
     
     
-    del_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables\Delegationservices_v38.csv")
+    del_serv_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/refs/heads/main/reference_tables/Delegationservices_v38.csv")
+    del_df = pd.read_csv(del_serv_URL)
+
     valid_codes = set(del_df.iloc[:, 0].dropna().astype(str))
     df[col] = df[col].astype(str)
     invalid = df[~df[col].isin(valid_codes)]
@@ -422,7 +428,8 @@ def validate_pod_code_columns(df):
         return f"Error: '{col}' column not found in the data."
     invalid = df[~df[col].isna()]
     invalid = invalid[invalid[col].astype(str).str.len() > 10]
-    npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables/NPOD.csv")
+    NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/refs/heads/main/reference_tables/NPOD.csv")
+    npod = pd.read_csv(NPOD_URL)
     valid_codes = set(npod.iloc[:, 0].dropna().astype(str))
     df[col] = df[col].astype(str)
     invalid = df[~df[col].isin(valid_codes)]
@@ -563,7 +570,7 @@ def validate_tariff_code_columns(df):
     tariff_up = tariff_clean.str.upper()
 
     # Load HRG reference codes
-    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/HRG.csv")
+    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/test_DQ_checks_delete_after_use/refs/heads/main/reference_tables/HRG.csv")
     hrg = pd.read_csv(hrg_URL)
 
     # HRG column name can vary; handle both
