@@ -563,8 +563,8 @@ def validate_tariff_code_columns(df):
     tariff_up = tariff_clean.str.upper()
 
     # Load HRG reference codes
-    hrg = pd.read_csv(
-        r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables\HRG.csv")
+    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/HRG.csv")
+    hrg = pd.read_csv(hrg_URL)
 
     # HRG column name can vary; handle both
     if 'HRG_code' in hrg.columns:
