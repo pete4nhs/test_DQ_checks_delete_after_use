@@ -89,11 +89,6 @@ st.write(
     "[https://www.england.nhs.uk/publication/iap-reporting-specification-technical-detail-specific-data-requirements/]"
     "(https://www.england.nhs.uk/publication/iap-reporting-specification-technical-detail-specific-data-requirements/)")
 
-#---------------
-#test how long it takes to update
-st.write("Prova per vedere se pubblicatoooo")
-
-
 # ---------------------- File upload (CSV only) ----------------------
 
 uploaded_lpr = st.file_uploader(
