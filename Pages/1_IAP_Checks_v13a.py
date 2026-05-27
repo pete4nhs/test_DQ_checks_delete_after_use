@@ -91,7 +91,7 @@ st.write(
 
 #---------------
 #test how long it takes to update
-st.write("Prova per vedere se pubblicato")
+st.write("Prova per vedere se pubblicatoooo")
 
 
 # ---------------------- File upload (CSV only) ----------------------
