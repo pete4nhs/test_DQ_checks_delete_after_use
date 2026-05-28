@@ -474,12 +474,11 @@ def validate_activity_TFC_columns(df):
             return f"Error: '{c}' column not found in the data."
 
     # when running locally
-    tfc_df = pd.read_csv(
-        r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\TFC.csv")
+#    tfc_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\TFC.csv")
 
     # when running in stlite
-#    tfc_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/TFC.csv")
-#    tfc_df = pd.read_csv(tfc_URL)    
+    tfc_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/TFC.csv")
+    tfc_df = pd.read_csv(tfc_URL)    
     
     valid_codes = set(tfc_df.iloc[:, 0].dropna().astype(str).str.strip())
     pod = df[pod_col].fillna("").astype("string").str.strip().str.upper()
@@ -555,11 +554,11 @@ def validate_service_code_columns(df):
     invalid = invalid[invalid['TARIFF CODE'].astype(str).str.len() > 12]
 
     # when running locally    
-    del_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\Delegationservices_v38.csv")
+#    del_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\Delegationservices_v38.csv")
 
     # when running in stlite
-#    del_serv_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/Delegationservices_v38.csv")
-#    del_df = pd.read_csv(del_serv_URL)   
+    del_serv_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/Delegationservices_v38.csv")
+    del_df = pd.read_csv(del_serv_URL)   
 
     valid_codes = set(del_df.iloc[:, 0].dropna().astype(str))
     df[col] = df[col].astype(str)
@@ -592,11 +591,11 @@ def validate_pod_code_columns(df):
     invalid = invalid[invalid[col].astype(str).str.len() > 10]
 
     # when running locally
-    npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables/NPOD.csv")
+#    npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables/NPOD.csv")
 
     # when running in stlite
-#    NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv")
-#    npod = pd.read_csv(NPOD_URL)
+    NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv")
+    npod = pd.read_csv(NPOD_URL)
 
     valid_codes = set(npod.iloc[:, 0].dropna().astype(str))
     df[col] = df[col].astype(str)
@@ -740,12 +739,11 @@ def validate_tariff_code_columns(df):
     # Load HRG reference
 
     # when running locally
-    hrg = pd.read_csv(
-        r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\HRG.csv")
+#    hrg = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\HRG.csv")
 
     # when running in stlite
-#    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/HRG.csv")
-#    hrg = pd.read_csv(hrg_URL)
+    hrg_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/HRG.csv")
+    hrg = pd.read_csv(hrg_URL)
 
     if 'HRG_code' in hrg.columns:
         hrg_col = 'HRG_code'
