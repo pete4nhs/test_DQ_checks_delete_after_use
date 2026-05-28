@@ -386,13 +386,11 @@ def validate_gp_practice_columns(df):
     # Load ICB reference
 
     # when running locally
-    ref_org = pd.read_csv(
-        r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
+#    ref_org = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
 
 #    # when running in stlite
-#    ref_org_URL = (
-#    "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
-#    ref_org = pd.read_csv(ref_org_URL)
+    ref_org_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
+    ref_org = pd.read_csv(ref_org_URL)
 
     # ✅ Decide which codes are valid
     icb_codes = ref_org['ICB_Code'].dropna().astype(str).str.strip()
@@ -423,13 +421,11 @@ def validate_residence_resp_columns(df):
     # Load ICB reference
 
     # when running locally
-    ref_org = pd.read_csv(
-        r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
+#    ref_org = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\ICB_and_SubICB_Apr2026.csv")
 
 #    # when running in stlite
-#    ref_org_URL = (
-#    "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
-#    ref_org = pd.read_csv(ref_org_URL)
+    ref_org_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/ICB_and_SubICB_Apr2026.csv")
+    ref_org = pd.read_csv(ref_org_URL)
 
     icb_codes = ref_org['ICB_Code'].dropna().astype(str).str.strip()
     org_codes = ref_org['Organisation_Code'].dropna().astype(str).str.strip()
