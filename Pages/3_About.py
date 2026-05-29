@@ -13,6 +13,4 @@ st.write('For any information on the process you can contact the **NHS England L
 st.write('')
 st.warning("**Please note that uploading and processing DQ checks through this tool does not constitute data submission. " \
 "This tool is solely intended to assess the formatting of your file.**")
-st.write('')
-st.write('')
-st.write('Testing')
+
