@@ -1071,13 +1071,14 @@ if st.button("Run checks", type="primary"):
         except Exception as e:
             st.error(f"Failed to read CSV file. {e}")
 
-        finally:
+#        finally:
             # 👉 Remove the message once done (success or failure)
-            status_msg.empty()
+ #           status_msg.empty()
 
 # ---------------------- Results ----------------------
 
-if st.session_state.calc_done and st.session_state.final_df is not None:
+if st.session_state.calc_done and st.session_state.final_df is not None
+    status_msg.empty()
     st.subheader("Results")
 
     with st.container(border=True):
