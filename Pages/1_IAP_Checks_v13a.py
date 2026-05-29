@@ -972,13 +972,13 @@ def style_results_table(df: pd.DataFrame):
 # ---------------------- Run checks button ----------------------
 
 if st.button("Run checks", type="primary"):
+    # 👉 Create a placeholder for the temporary message
+    status_msg = st.empty()
+    status_msg.info("Running checks, this might take a few seconds...")
     if uploaded_lpr is None:
         st.warning("Please upload a CSV file before running checks.")
         st.session_state.show_instruction_msg = True
     else:
-        # 👉 Create a placeholder for the temporary message
-        status_msg = st.empty()
-        status_msg.info("Running checks, this might take a few seconds...")
         try:
             with st.spinner("Running calculations..."):
                 df = pd.read_csv(
