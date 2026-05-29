@@ -1077,7 +1077,7 @@ if st.button("Run checks", type="primary"):
 
 # ---------------------- Results ----------------------
 
-if st.session_state.calc_done and st.session_state.final_df is not None
+if st.session_state.calc_done and st.session_state.final_df is not None 
     st.subheader("Results")
 
     with st.container(border=True):
