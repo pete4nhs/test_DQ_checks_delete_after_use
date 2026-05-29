@@ -972,16 +972,13 @@ def style_results_table(df: pd.DataFrame):
 # ---------------------- Run checks button ----------------------
 
 if st.button("Run checks", type="primary"):
-        # 👉 Create a placeholder for the temporary message
-    status_msg = st.empty()
-    status_msg.info("Running checks, this might take a few seconds...")
     if uploaded_lpr is None:
         st.warning("Please upload a CSV file before running checks.")
         st.session_state.show_instruction_msg = True
     else:
         # 👉 Create a placeholder for the temporary message
-#        status_msg = st.empty()
-#        status_msg.info("Running checks, this might take a few seconds...")
+        status_msg = st.empty()
+        status_msg.info("Running checks, this might take a few seconds...")
         try:
             with st.spinner("Running calculations..."):
                 df = pd.read_csv(
@@ -1074,14 +1071,13 @@ if st.button("Run checks", type="primary"):
         except Exception as e:
             st.error(f"Failed to read CSV file. {e}")
 
-        #finally:
+        finally:
             # 👉 Remove the message once done (success or failure)
-            #status_msg.empty()
+            status_msg.empty()
 
 # ---------------------- Results ----------------------
 
 if st.session_state.calc_done and st.session_state.final_df is not None:
-    status_msg.empty()
     st.subheader("Results")
 
     with st.container(border=True):
