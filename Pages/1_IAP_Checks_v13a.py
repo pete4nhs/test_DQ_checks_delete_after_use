@@ -977,7 +977,7 @@ if st.button("Run checks", type="primary"):
     status_msg.info("Running checks, this might take a few seconds...")
     if uploaded_lpr is None:
         st.warning("Please upload a CSV file before running checks.")
-        st.session_state.show_instruction_msg = True
+#        st.session_state.show_instruction_msg = True
     else:
         try:
             with st.spinner("Running calculations..."):
