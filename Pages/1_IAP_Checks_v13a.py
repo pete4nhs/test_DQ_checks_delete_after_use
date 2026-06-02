@@ -314,6 +314,57 @@ def non_activity_zero_rule_triggered(df: pd.DataFrame, field_col: str) -> bool:
             act_num.isna() |
             (act_num != 0))).any()
 
+
+LENGTH_RULES = {
+    "GENERAL MEDICAL PRACTICE (PATIENT REGISTRATION)": {"type": "exact", "value": 6},
+    "LOCAL SUB-SPECIALTY CODE": {"type": "max", "value": 8},
+    "WARD CODE": {"type": "max", "value": 12},
+    "LOCAL POINT OF DELIVERY CODE": {"type": "max", "value": 50},
+    "LOCAL POINT OF DELIVERY DESCRIPTION": {"type": "max", "value": 100},
+    "LOCAL CONTRACT CODE": {"type": "max", "value": 20},
+    "LOCAL CONTRACT CODE DESCRIPTION": {"type": "max", "value": 100},
+    "LOCAL CONTRACT MONITORING CODE": {"type": "max", "value": 30},
+    "LOCAL CONTRACT MONITORING DESCRIPTION": {"type": "max", "value": 100},
+    "CONTRACT MONITORING ADDITIONAL DETAIL": {"type": "max", "value": 50},
+    "CONTRACT MONITORING ADDITIONAL DESCRIPTION": {"type": "max", "value": 100},}
+
+def length_rule_triggered(df: pd.DataFrame, col: str) -> bool:
+    """
+    Returns True only when the field has an actual character-length issue.
+    This avoids showing a length note for unrelated problems such as a missing column.
+    """
+    if col not in df.columns or col not in LENGTH_RULES:
+        return False
+
+    rule = LENGTH_RULES[col]
+    s = df[col].astype("string")
+    present = s.notna()
+
+    if rule["type"] == "exact":
+        return (present & (s.str.len() != rule["value"])).any()
+
+    if rule["type"] == "max":
+        return (present & (s.str.len() > rule["value"])).any()
+
+    return False
+
+def get_length_rule_note(col: str) -> str:
+    """
+    Returns a friendly note describing the character length rule.
+    """
+    rule = LENGTH_RULES.get(col)
+    if not rule:
+        return ""
+
+    if rule["type"] == "exact":
+        return f"This field must be exactly {rule['value']} characters long."
+
+    if rule["type"] == "max":
+        return f"This field must be {rule['value']} characters or fewer."
+
+    return ""
+
+
 # ---------------------- Header ----------------------
 
 st.image("input_data_other/london_logos_n_name.png", width=1050)
@@ -1042,20 +1093,22 @@ if st.button("Run checks", type="primary"):
                 ], name="Status")
 
 
-                notes = columns.map(
-                    lambda c: (
-                        BLANK_RULE_NOTE
-                        if (c in BLANK_WHEN_NON_ACTIVITY_POD_FIELDS
-                            and non_activity_blank_rule_triggered(df, c))
-
-                        else CONTR_MON_PLAN_ACT_RULE_NOTE
-                        if (c == "CONTRACT MONITORING PLANNED ACTIVITY"
-                            and non_activity_zero_rule_triggered(df, c))
-
-                        else TARIFF_RULE_NOTE
-                        if (c == "TARIFF CODE"
-                            and tariff_rule_triggered(df))
-                        else "")).rename("Notes")
+                def build_note(df: pd.DataFrame, col: str) -> str:
+                    if col in BLANK_WHEN_NON_ACTIVITY_POD_FIELDS and non_activity_blank_rule_triggered(df, col):
+                        return BLANK_RULE_NOTE
+                
+                    if col == "CONTRACT MONITORING PLANNED ACTIVITY" and non_activity_zero_rule_triggered(df, col):
+                        return CONTR_MON_PLAN_ACT_RULE_NOTE
+                
+                    if col == "TARIFF CODE" and tariff_rule_triggered(df):
+                        return TARIFF_RULE_NOTE
+                
+                    if col in LENGTH_RULES and length_rule_triggered(df, col):
+                        return get_length_rule_note(col)
+                
+                    return ""
+                
+                notes = columns.map(lambda c: build_note(df, c)).rename("Notes")
 
                 dfs = [columns, requirement, status]
 
