@@ -35,7 +35,8 @@ if "show_instruction_msg" not in st.session_state:
     st.session_state.show_instruction_msg = True
 if "upload_success" not in st.session_state:
     st.session_state.upload_success = False
-
+if "run_checks_requested" not in st.session_state:
+    st.session_state.run_checks_requested = False
 
 # ---------------------- Helpers ----------------------
 
@@ -315,6 +316,8 @@ def non_activity_zero_rule_triggered(df: pd.DataFrame, field_col: str) -> bool:
             (act_num != 0))).any()
 
 
+# ---------------------- Length restriction notes ----------------------
+
 LENGTH_RULES = {
     "GENERAL MEDICAL PRACTICE (PATIENT REGISTRATION)": {"type": "exact", "value": 6},
     "LOCAL SUB-SPECIALTY CODE": {"type": "max", "value": 8},
@@ -363,6 +366,7 @@ def get_length_rule_note(col: str) -> str:
         return f"This field must be {rule['value']} characters or fewer."
 
     return ""
+
 
 
 # ---------------------- Header ----------------------
@@ -1005,129 +1009,138 @@ def style_results_table(df: pd.DataFrame):
 
 
 # ---------------------- Run checks button ----------------------
-
 if st.button("Run checks", type="primary"):
     if uploaded_lpr is None:
         st.warning("Please upload a CSV file before running checks.")
         st.session_state.show_instruction_msg = True
     else:
-        try:
-            with st.spinner("Running calculations..."):
-                df = pd.read_csv(
-                    uploaded_lpr,
-                    dtype="string",         # read everything safely as string
-                    encoding="utf-8-sig")
-
-                df = df.dropna(how="all").copy()
-
-                # Normalise headers so underscores/spaces/case differences don't matter
-                df = normalise_dataframe_headers(df)
-
-                # Clean month/year values (before validation)
-                if "FINANCIAL MONTH" in df.columns:
-                    df["FINANCIAL MONTH"] = clean_numeric_text(df["FINANCIAL MONTH"])
-
-                if "FINANCIAL YEAR" in df.columns:
-                    df["FINANCIAL YEAR"] = clean_numeric_text(df["FINANCIAL YEAR"])
-
-                # Build results
-                columns = pd.Series([
-                'FINANCIAL MONTH', 'FINANCIAL YEAR', 'DATE AND TIME DATA SET CREATED',
-                'ORGANISATION IDENTIFIER (CODE OF PROVIDER)',
-                'ORGANISATION SITE IDENTIFIER (OF TREATMENT)',
-                'ORGANISATION IDENTIFIER (GP PRACTICE RESPONSIBILITY)',
-                'ORGANISATION IDENTIFIER (RESIDENCE RESPONSIBILITY)',
-                'ORGANISATION IDENTIFIER (CODE OF COMMISSIONER)',
-                'GENERAL MEDICAL PRACTICE (PATIENT REGISTRATION)',
-                'ACTIVITY TREATMENT FUNCTION CODE', 'LOCAL SUB-SPECIALTY CODE',
-                'WARD CODE', 'COMMISSIONED SERVICE CATEGORY CODE', 'SERVICE CODE',
-                'SPECIALISED MENTAL HEALTH SERVICE CATEGORY CODE',
-                'POINT OF DELIVERY CODE', 'POINT OF DELIVERY FURTHER DETAIL CODE',
-                'POINT OF DELIVERY FURTHER DETAIL DESCRIPTION',
-                'LOCAL POINT OF DELIVERY CODE', 'LOCAL POINT OF DELIVERY DESCRIPTION',
-                'LOCAL CONTRACT CODE', 'LOCAL CONTRACT CODE DESCRIPTION',
-                'LOCAL CONTRACT MONITORING CODE', 'LOCAL CONTRACT MONITORING DESCRIPTION',
-                'CONTRACT MONITORING ADDITIONAL DETAIL',
-                'CONTRACT MONITORING ADDITIONAL DESCRIPTION', 'TARIFF CODE',
-                'NATIONAL TARIFF INDICATOR', 'CONTRACT MONITORING PLANNED ACTIVITY',
-                'CONTRACT MONITORING PLANNED PRICE',
-                'CONTRACT MONITORING PLANNED MARKET FORCES FACTOR',
-                'NAME OF SUBMITTER'
-                ], name='Column name')
-
-                requirement = columns.map(REQUIREMENT_MAP).rename("Field requirement")
-
-                status = pd.Series([
-                    format_status_for_output(to_1_based_indices(validate_month_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_year_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_datetime_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_cop_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_of_treatment_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_gp_practice_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_residence_resp_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_commissioner_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_patient_reg_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_activity_TFC_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_sub_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_ward_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_commissioned_service_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_service_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_specialised_mental_health_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_pod_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_pod_further_detail_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_pod_further_detail_desc_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_pod_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_pod_desc_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_contract_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_contract_code_desc_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_contract_monitoring_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_local_contract_monitoring_desc_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_contract_monitoring_detail_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_contract_monitoring_desc_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_tariff_code_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_tariff_indicator_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_contract_monitoring_activity_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_contract_monitoring_price_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_contract_monitoring_market_columns(df))),
-                    format_status_for_output(to_1_based_indices(validate_name_of_submitter_columns(df))),
-                ], name="Status")
+        st.session_state.run_checks_requested = True
+        st.rerun()
 
 
-                def build_note(df: pd.DataFrame, col: str) -> str:
-                    if col in BLANK_WHEN_NON_ACTIVITY_POD_FIELDS and non_activity_blank_rule_triggered(df, col):
-                        return BLANK_RULE_NOTE
-                
-                    if col == "CONTRACT MONITORING PLANNED ACTIVITY" and non_activity_zero_rule_triggered(df, col):
-                        return CONTR_MON_PLAN_ACT_RULE_NOTE
-                
-                    if col == "TARIFF CODE" and tariff_rule_triggered(df):
-                        return TARIFF_RULE_NOTE
-                
-                    if col in LENGTH_RULES and length_rule_triggered(df, col):
-                        return get_length_rule_note(col)
-                
-                    return ""
-                
-                notes = columns.map(lambda c: build_note(df, c)).rename("Notes")
+if st.session_state.run_checks_requested:
 
-                dfs = [columns, requirement, status]
+    # Show the message FIRST
+    st.info("Running checks, this might take a few seconds...")
 
-                # Only include Notes if at least one note is populated
-                if notes.str.strip().ne("").any():
-                    dfs.append(notes)
+    # Reset immediately so it doesn't loop forever
+    st.session_state.run_checks_requested = False
 
-                final_df = pd.concat(dfs, axis=1)
+    try:
+        df = pd.read_csv(
+            uploaded_lpr,
+            dtype="string",
+            encoding="utf-8-sig"
+        )
 
-                # Save for preview/download
-                csv = final_df.to_csv(index=False)
-                st.session_state.csv_bytes = csv.encode("utf-8")
-                st.session_state.final_df = final_df
-                st.session_state.calc_done = True
-                st.session_state.show_preview = False  # do not auto-open
-                st.session_state.show_instruction_msg = False
+        df = df.dropna(how="all").copy()
 
-        except Exception as e:
-            st.error(f"Failed to read CSV file. {e}")
+        # Normalise headers
+        df = normalise_dataframe_headers(df)
+
+        # Clean month/year values
+        if "FINANCIAL MONTH" in df.columns:
+            df["FINANCIAL MONTH"] = clean_numeric_text(df["FINANCIAL MONTH"])
+
+        if "FINANCIAL YEAR" in df.columns:
+            df["FINANCIAL YEAR"] = clean_numeric_text(df["FINANCIAL YEAR"])
+
+        columns = pd.Series([
+            'FINANCIAL MONTH', 'FINANCIAL YEAR', 'DATE AND TIME DATA SET CREATED',
+            'ORGANISATION IDENTIFIER (CODE OF PROVIDER)',
+            'ORGANISATION SITE IDENTIFIER (OF TREATMENT)',
+            'ORGANISATION IDENTIFIER (GP PRACTICE RESPONSIBILITY)',
+            'ORGANISATION IDENTIFIER (RESIDENCE RESPONSIBILITY)',
+            'ORGANISATION IDENTIFIER (CODE OF COMMISSIONER)',
+            'GENERAL MEDICAL PRACTICE (PATIENT REGISTRATION)',
+            'ACTIVITY TREATMENT FUNCTION CODE', 'LOCAL SUB-SPECIALTY CODE',
+            'WARD CODE', 'COMMISSIONED SERVICE CATEGORY CODE', 'SERVICE CODE',
+            'SPECIALISED MENTAL HEALTH SERVICE CATEGORY CODE',
+            'POINT OF DELIVERY CODE', 'POINT OF DELIVERY FURTHER DETAIL CODE',
+            'POINT OF DELIVERY FURTHER DETAIL DESCRIPTION',
+            'LOCAL POINT OF DELIVERY CODE', 'LOCAL POINT OF DELIVERY DESCRIPTION',
+            'LOCAL CONTRACT CODE', 'LOCAL CONTRACT CODE DESCRIPTION',
+            'LOCAL CONTRACT MONITORING CODE', 'LOCAL CONTRACT MONITORING DESCRIPTION',
+            'CONTRACT MONITORING ADDITIONAL DETAIL',
+            'CONTRACT MONITORING ADDITIONAL DESCRIPTION', 'TARIFF CODE',
+            'NATIONAL TARIFF INDICATOR', 'CONTRACT MONITORING PLANNED ACTIVITY',
+            'CONTRACT MONITORING PLANNED PRICE',
+            'CONTRACT MONITORING PLANNED MARKET FORCES FACTOR',
+            'NAME OF SUBMITTER'
+        ], name='Column name')
+
+        requirement = columns.map(REQUIREMENT_MAP).rename("Field requirement")
+
+        status = pd.Series([
+            format_status_for_output(to_1_based_indices(validate_month_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_year_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_datetime_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_cop_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_of_treatment_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_gp_practice_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_residence_resp_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_commissioner_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_patient_reg_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_activity_TFC_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_sub_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_ward_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_commissioned_service_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_service_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_specialised_mental_health_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_pod_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_pod_further_detail_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_pod_further_detail_desc_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_pod_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_pod_desc_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_contract_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_contract_code_desc_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_contract_monitoring_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_local_contract_monitoring_desc_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_contract_monitoring_detail_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_contract_monitoring_desc_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_tariff_code_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_tariff_indicator_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_contract_monitoring_activity_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_contract_monitoring_price_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_contract_monitoring_market_columns(df))),
+            format_status_for_output(to_1_based_indices(validate_name_of_submitter_columns(df))),
+        ], name="Status")
+
+        def build_note(df: pd.DataFrame, col: str) -> str:
+            if col in BLANK_WHEN_NON_ACTIVITY_POD_FIELDS and non_activity_blank_rule_triggered(df, col):
+                return BLANK_RULE_NOTE
+
+            if col == "CONTRACT MONITORING PLANNED ACTIVITY" and non_activity_zero_rule_triggered(df, col):
+                return CONTR_MON_PLAN_ACT_RULE_NOTE
+
+            if col == "TARIFF CODE" and tariff_rule_triggered(df):
+                return TARIFF_RULE_NOTE
+
+            if col in LENGTH_RULES and length_rule_triggered(df, col):
+                return get_length_rule_note(col)
+
+            return ""
+
+        notes = columns.map(lambda c: build_note(df, c)).rename("Notes")
+
+        dfs = [columns, requirement, status]
+
+        # Only include Notes if at least one note is populated
+        if notes.str.strip().ne("").any():
+            dfs.append(notes)
+
+        final_df = pd.concat([columns, requirement, status], axis=1)
+
+        csv = final_df.to_csv(index=False)
+        st.session_state.csv_bytes = csv.encode("utf-8")
+        st.session_state.final_df = final_df
+        st.session_state.calc_done = True
+        st.session_state.show_preview = False
+        st.session_state.show_instruction_msg = False
+
+    except Exception as e:
+        st.error(f"Failed to read CSV file. {e}")
+
 
 # ---------------------- Results ----------------------
 
