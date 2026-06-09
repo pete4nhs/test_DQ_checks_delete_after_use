@@ -1032,17 +1032,6 @@ if st.session_state.run_phase == "show_message":
     # force a second rerun so UI paints FIRST
     st.rerun()
 
-
-
-# ---------------------- Run checks button ----------------------
-if st.button("Run checks", type="primary"):
-    if uploaded_lpr is None:
-        st.warning("Please upload a CSV file before running checks.")
-        st.session_state.show_instruction_msg = True
-    else:
-        st.session_state.run_phase = "show_message"
-        st.rerun()
-
 # Phase 1: show the message only
 if st.session_state.run_phase == "show_message":
     st.info("Running checks, this might take a few seconds...")
