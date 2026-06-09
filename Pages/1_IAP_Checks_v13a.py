@@ -1020,9 +1020,6 @@ if st.button("Run checks", type="primary", key="run_checks_btn"):
         st.session_state.run_phase = "show_message"
         st.rerun()
 
-# 3. Add THIS block (just after the button)
-#This is the missing piece:
-
 if st.session_state.run_phase == "show_message":
     st.info("Running checks, this might take a few seconds...")
 
@@ -1032,24 +1029,13 @@ if st.session_state.run_phase == "show_message":
     # force a second rerun so UI paints FIRST
     st.rerun()
 
-# Phase 1: show the message only
-if st.session_state.run_phase == "show_message":
-    st.info("Running checks, this might take a few seconds...")
-
-    # Move to next phase
-    st.session_state.run_phase = "run_checks"
-
-    # Force another rerun so stlite has a chance to paint the message first
-    st.rerun()
-
 # Phase 2: run the checks
 if st.session_state.run_phase == "run_checks":
     try:
         df = pd.read_csv(
             uploaded_lpr,
             dtype="string",
-            encoding="utf-8-sig"
-        )
+            encoding="utf-8-sig")
 
         df = df.dropna(how="all").copy()
 
