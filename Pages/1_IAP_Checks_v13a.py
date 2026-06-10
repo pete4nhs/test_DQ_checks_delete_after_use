@@ -1018,7 +1018,7 @@ if st.button("Run checks", type="primary", key="run_checks_btn"):
         st.session_state.show_instruction_msg = True
     else:
         st.session_state.run_phase = "show_message"
-        st.rerun()
+        #st.rerun()
 
 if st.session_state.run_phase == "show_message":
     st.info("Running checks, this might take a few seconds...")
@@ -1027,7 +1027,7 @@ if st.session_state.run_phase == "show_message":
     st.session_state.run_phase = "run_checks"
 
     # force a second rerun so UI paints FIRST
-    st.rerun()
+    #st.rerun()
 
 # Phase 2: run the checks
 if st.session_state.run_phase == "run_checks":
