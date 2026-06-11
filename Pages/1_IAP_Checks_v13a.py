@@ -678,16 +678,21 @@ def validate_service_code_columns(df):
     if col not in df.columns:
         return f"Error: '{col}' column not found in the data."
     
-    # when running locally    
-#    del_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\Delegationservices_v38.csv")
-
     # when running in stlite
     del_serv_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/Delegationservices_v38.csv")
     del_df = pd.read_csv(del_serv_URL)   
 
-    valid_codes = set(del_df.iloc[:, 0].dropna().astype(str))
-    df[col] = df[col].astype(str)
-    invalid = df[~df[col].isin(valid_codes)]
+    # ✅ Make reference codes uppercase + trimmed
+    valid_codes = {str(v).strip().upper()
+        for v in del_df.iloc[:, 0].dropna()}
+
+    # ✅ Clean + normalise user input the same way
+    s = df[col].astype("string").str.strip()
+    s_up = s.str.upper()
+
+    # ✅ Case-insensitive comparison
+    invalid = df[~s_up.isin(valid_codes)]
+
     return list(invalid.index) if not invalid.empty else "Valid"
 
 # --------------------- SPECIALISED MENTAL HEALTH SERVICE CATEGORY CODE (mandatory where relevant)
