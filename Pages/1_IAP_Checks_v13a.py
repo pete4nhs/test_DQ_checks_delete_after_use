@@ -697,7 +697,6 @@ def validate_service_code_columns(df):
 
 # --------------------- SPECIALISED MENTAL HEALTH SERVICE CATEGORY CODE (mandatory where relevant)
 def validate_specialised_mental_health_code_columns(df):
-
     col = 'SPECIALISED MENTAL HEALTH SERVICE CATEGORY CODE'
 
     if col not in df.columns:
@@ -705,46 +704,29 @@ def validate_specialised_mental_health_code_columns(df):
 
     invalid_rows = df[
         df[col].notna() &
-        (df[col].astype(str).str.len() > 50)]
-    return list(invalid_rows.index) if not invalid_rows.empty else "Valid"
+        (df[col].astype(str).str.len() > 50)
+    ]
 
+    return list(invalid_rows.index) if not invalid_rows.empty else "Valid"
 
 # --------------------- POINT OF DELIVERY CODE (mandatory)
 def validate_pod_code_columns(df):
     col = 'POINT OF DELIVERY CODE'
     if col not in df.columns:
         return f"Error: '{col}' column not found in the data."
-
-    # Load NPOD reference file
+    invalid = df[~df[col].isna()]
+    invalid = invalid[invalid[col].astype(str).str.len() > 10]
 
     # when running locally
-    # npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\NPOD.csv")
+#    npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables/NPOD.csv")
 
     # when running in stlite
     NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv")
     npod = pd.read_csv(NPOD_URL)
 
-    # Normalise reference codes
-    valid_codes = set(
-        npod.iloc[:, 0]
-        .astype("string")
-        .str.replace(r"\s+", " ", regex=True)
-        .str.strip()
-        .str.upper()
-        .dropna())
-
-    # Normalise submitted POD values
-    pod = (f[col]
-        .astype("string")
-        .str.replace(r"\s+", " ", regex=True)
-        .str.strip()
-        .str.upper())
-
-    # Validation rules
-    invalid_length = pod.notna() & (pod.str.len() > 10)
-    invalid_code = ~pod.isin(valid_codes)
-
-    invalid = df[invalid_length | invalid_code]
+    valid_codes = set(npod.iloc[:, 0].dropna().astype(str))
+    df[col] = df[col].astype(str)
+    invalid = df[~df[col].isin(valid_codes)]
     return list(invalid.index) if not invalid.empty else "Valid"
 
 # --------------------- POINT OF DELIVERY FURTHER DETAIL CODE (mandatory where relevant)
