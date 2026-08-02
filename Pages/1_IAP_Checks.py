@@ -724,18 +724,27 @@ def validate_pod_code_columns(df):
     NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv")
     npod = pd.read_csv(NPOD_URL)
 
-    # Normalise reference codes
+
+
+  # Normalise reference codes
     valid_codes = set(
         npod.iloc[:, 0]
         .astype("string")
+        .str.replace("\ufeff", "", regex=False)
+        .str.replace("\u00a0", " ", regex=False)
+        .str.replace(r"[\u200B-\u200D\uFEFF]", "", regex=True)
         .str.replace(r"\s+", " ", regex=True)
         .str.strip()
         .str.upper()
         .dropna())
-
+    
     # Normalise submitted POD values
-    pod = (df[col]
+    pod = (
+        df[col]
         .astype("string")
+        .str.replace("\ufeff", "", regex=False)
+        .str.replace("\u00a0", " ", regex=False)
+        .str.replace(r"[\u200B-\u200D\uFEFF]", "", regex=True)
         .str.replace(r"\s+", " ", regex=True)
         .str.strip()
         .str.upper())
