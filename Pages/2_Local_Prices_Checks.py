@@ -260,18 +260,37 @@ def validate_service_code_columns(df):
     return list(invalid.index) if not invalid.empty else "Valid"
 
 
+# --------------------- POINT OF DELIVERY CODE (mandatory)
 def validate_pod_code_columns(df):
-    if 'POINT OF DELIVERY CODE' not in df.columns:
-        return "Error: 'POINT OF DELIVERY CODE' column not found in the data."
+    col = 'POINT OF DELIVERY CODE'
+    if col not in df.columns:
+        return f"Error: '{col}' column not found in the data."
 
-    invalid = df[~df['POINT OF DELIVERY CODE'].isna()]
-    invalid = invalid[invalid['POINT OF DELIVERY CODE'].astype(str).str.len() > 10]
+    # when running locally
+    # npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\NPOD.csv")
 
-    npod_df = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating Local Prices checks\reference_tables/NPOD.csv")
-    valid_codes = set(npod_df.iloc[:, 0].dropna().astype(str))
-    df['POINT OF DELIVERY CODE'] = df['POINT OF DELIVERY CODE'].astype(str)
+    # when running in stlite
+    NPOD_URL = "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv"
+    npod = pd.read_csv(NPOD_URL)
 
-    invalid = df[~df['POINT OF DELIVERY CODE'].isin(valid_codes)]
+    # Clean and normalise reference values
+    valid_codes = set(
+        clean_numeric_text(npod.iloc[:, 0])
+        .str.upper()
+        .dropna())
+
+    # Clean and normalise uploaded values
+    pod = (
+        clean_numeric_text(df[col])
+        .str.upper())
+
+    # Length rule
+    invalid_length = pod.notna() & (pod.str.len() > 10)
+
+    # Value rule
+    invalid_code = ~pod.isin(valid_codes)
+    invalid = df[invalid_length | invalid_code]
+
     return list(invalid.index) if not invalid.empty else "Valid"
 
 
