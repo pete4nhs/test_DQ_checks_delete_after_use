@@ -722,8 +722,7 @@ def validate_pod_code_columns(df):
 
     # when running in stlite
     NPOD_URL = (
-        "https://raw.githubusercontent.com/pete4nhs/"
-        "DQ_checks/main/reference_tables/NPOD.csv"
+        "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv"
     )
     npod = pd.read_csv(NPOD_URL)
 
