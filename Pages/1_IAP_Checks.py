@@ -709,51 +709,33 @@ def validate_specialised_mental_health_code_columns(df):
 
 # --------------------- POINT OF DELIVERY CODE (mandatory)
 def validate_pod_code_columns(df):
-
     col = 'POINT OF DELIVERY CODE'
-
     if col not in df.columns:
         return f"Error: '{col}' column not found in the data."
 
     # when running locally
-    # npod = pd.read_csv(
-    #     r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\NPOD.csv"
-    # )
+    # npod = pd.read_csv(r"C:\Users\peter.saiu\OneDrive - NHS\Scripts\Python\Automating_IAPs_&_Local_Prices_DQ_checks\reference_tables\NPOD.csv")
 
     # when running in stlite
-    NPOD_URL = (
-        "https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv"
-    )
+    NPOD_URL = ("https://raw.githubusercontent.com/pete4nhs/DQ_checks/main/reference_tables/NPOD.csv")
     npod = pd.read_csv(NPOD_URL)
 
     # Clean and normalise NPOD reference values
     valid_codes = set(
         clean_numeric_text(npod.iloc[:, 0])
         .str.upper()
-        .dropna()
-    )
+        .dropna())
+    
+    pod = (clean_numeric_text(df[col])
+        .str.upper())
 
-    # Clean and normalise uploaded POD values
-    pod = (
-        clean_numeric_text(df[col])
-        .str.upper()
-    )
-
-    # Diagnostic output
+    # Validity check
     invalid_mask = ~pod.isin(valid_codes)
-
-    st.write("INPUT VALUES")
-    st.write(sorted(pod.dropna().unique())[:20])
-
-    st.write("REFERENCE VALUES")
-    st.write(sorted(list(valid_codes))[:20])
-
-    st.write("FAILED VALUES")
-    st.write(sorted(pod[invalid_mask].dropna().unique()))
-
-    # Actual validation
+    
+    # Lenght rule validation
     invalid_length = pod.notna() & (pod.str.len() > 10)
 
+    # In valid rows
     invalid = df[invalid_mask | invalid_length]
 
     return list(invalid.index) if not invalid.empty else "Valid"
